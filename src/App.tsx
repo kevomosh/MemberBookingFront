@@ -1,25 +1,45 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, {useReducer} from 'react';
 import './App.css';
+import {BrowserRouter, Switch, Route} from "react-router-dom";
+import {GlobalAction, GlobalReducer, IGlobalState} from "./services/GlobalReducer";
+import {routes} from "./routes";
+import Header from "./components/Header";
+
+
+export interface GlobalContextType {
+    globalState: IGlobalState,
+    globalDispatch: React.Dispatch<GlobalAction>
+}
+
+export const GlobalContext = React.createContext({} as GlobalContextType);
+
+const initialGlobalState: IGlobalState = {
+    currentMember: {},
+    allMembers: [],
+    loading: false,
+    error: {}
+}
 
 function App() {
+    const [globalState, globalDispatch] = useReducer(GlobalReducer, initialGlobalState)
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+        <GlobalContext.Provider value={{globalState, globalDispatch}}>
+            <BrowserRouter>
+                <Header/>
+                <Switch>
+                    {routes.map((route, index) => {
+                        return (
+                            <Route
+                                key={index}
+                                path={route.path}
+                                exact={route.exact}
+                                component={route.component}
+                            />
+                        )
+                    })}
+                </Switch>
+            </BrowserRouter>
+        </GlobalContext.Provider>
   );
 }
 
